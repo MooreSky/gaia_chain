@@ -1,1 +1,3 @@
-./bin/pi_serv.exe -c ../pi,../brigde,../app
+.\bin\pi_serv.exe -c gaia
+
+pause

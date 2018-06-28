@@ -14,6 +14,7 @@ import {ServerNode} from "../mqtt/server"
 import {Session} from "../mqtt/session"
 import {RPCServer} from "../rpc/server"
 import {TopicHandler} from "./handler"
+import {AsyncRequestHandler} from "./handler"
 import {Depend} from "./depend"
 export class DBIter extends NObject{    
     
@@ -134,11 +135,28 @@ export const register_rpc_handler = (serv:RPCServer,topic:string,sync:boolean,ha
 }
 
 
+export const register_async_handler = (topic:string,handler:AsyncRequestHandler) => {               
+    (<any>handler) = handler.self;
+    
+    call(188544322,[ topic,handler ]);
+}
+
+
 export const arc_new_TopicHandler = (v:TopicHandler): TopicHandler => {          
     (<any>v) = v.self;
     
     let result = call(690562975,[ v ]);     
     (<any>result) = new TopicHandler(result);
+    
+    return result; 
+}
+
+
+export const arc_new_AsyncRequestHandler = (v:AsyncRequestHandler): AsyncRequestHandler => {          
+    (<any>v) = v.self;
+    
+    let result = call(3614283964,[ v ]);     
+    (<any>result) = new AsyncRequestHandler(result);
     
     return result; 
 }
@@ -172,6 +190,13 @@ export const set_timeout = (ms:number, f:() => void) => {
     var _$index = callbacks.register(f);
      
     call(3964336770,[ ms, _$index]);
+}
+
+
+export const clear_timeout = (index:AtomIndex) => {          
+    (<any>index) = index.self;
+    
+    call(1432682371,[ index ]);
 }
 
 
@@ -220,6 +245,8 @@ export const try_fill_bytes = (or:Rand,len:number): Vec| Error => {
     return result; 
 }
 export class DBWare extends NObject{
+}
+export class AtomIndex extends NObject{
 }
 export class Rand extends NObject{
 }
