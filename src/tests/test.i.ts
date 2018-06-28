@@ -1,27 +1,23 @@
-import {chai} from "./chai";
-import {mocha} from "./mocha";
+import { chai } from "./framework/chai";
+import { mocha } from "./framework/mocha";
+
+declare const it, describe;
 
 mocha.setup('bdd');
-var should = chai.should();
-function add(a, b)
-{
-    return a + b;
-}
-describe("测试add函数", function()
-{
-    console.log("2222222222222222222222222222222222222222222");
-	it("1加1等于2", function()
-    {
+let should = chai.should();
+
+const add = (a: number, b: number) => a + b;
+
+describe("test add function", () => {
+    it("1 add 1 expect 2", () => {
         var sum = add(1, 2);
         should.equal(sum, 3);
     });
 
-    it("1加2等于3", function()
-    {
+    it("1 add 2 expect 3", () => {
         var sum = add(1, 2);
         should.equal(sum, 3);
     });
 });
 
 mocha.run();
-console.log("2222222222222222222222222222222222222222222");
