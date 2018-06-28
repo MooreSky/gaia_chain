@@ -1,3 +1,6 @@
-# app_chain
+# gaia blockchain
 
-the main chain logic
+git clone pi_build in parent dir
+
+
+
