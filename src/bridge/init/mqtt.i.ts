@@ -86,5 +86,5 @@ const createHandler = (tr: Tr, mgr: Mgr, file: string): TopicHandler|Error => {
     }
     
 
-    //return arc_new_TopicHandler(TopicHandler.new(1000, vmf, db_mgr));
+    return arc_new_TopicHandler(TopicHandler.new(1000, vmf, db_mgr));
 }

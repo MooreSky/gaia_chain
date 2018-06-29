@@ -3,9 +3,9 @@ import {Vec} from "../rust/def/vec";
 import {NetManager} from "../rust/net/api";
 import {Mgr, Tr} from "../rust/pi_db/mgr";
 import {RPCServer} from "../rust/rpc/server";
-import {mqtt_bind, register_rpc_handler, iter_db, DBIter, get_depend, tabkv_new, arc_deref_Vec, tabkv_get_value, clone_vm_factory, arc_new_TopicHandler} from "../rust/pi_serv/js_call";
+import {register_async_handler, iter_db, DBIter, get_depend, tabkv_new, arc_deref_Vec, tabkv_get_value, arc_new_AsyncRequestHandler} from "../rust/pi_serv/js_call";
 import {Depend} from "../rust/pi_serv/depend";
-import {TopicHandler} from "../rust/pi_serv/handler";
+import {AsyncRequestHandler} from "../rust/pi_serv/handler";
 import {cfgMgr} from "../../pi/util/cfg";
 import {AsyncMeta} from "../async/async_meta.s";
 import {Error} from "../vm/vm";
@@ -45,19 +45,19 @@ export const init = () => {
             let handler = map.get(file);
             console.log("topic:" + topic);
             if(!handler){
-                handler = createHandler(tr, db_mgr, file);//创建handler， 同一js文件下的rpc函数， handler应该是同一个
+                handler = createHandler(tr, file);//创建handler， 同一js文件下的rpc函数， handler应该是同一个
                 if(handler instanceof Error){
                     return handler;
                 }
                 map.set(file, handler);
             }
-            //register_rpc_handler(rpcServer, topic, false, handler); //向rpc服务中设置handler
+            register_async_handler(topic, handler); //注册一个异步处理器
         }
     })
     console.log("init mqtt ok");
 }
 
-const createHandler = (tr: Tr, mgr: Mgr, file: string): TopicHandler|Error => {
+const createHandler = (tr: Tr, file: string): AsyncRequestHandler|Error => {
     let vmf = VMFactory.new(0);
     let dp = get_depend(depend, file + ".r.js").as_slice_String();
     let codeItems = Vec.new_TabKV();
@@ -77,7 +77,6 @@ const createHandler = (tr: Tr, mgr: Mgr, file: string): TopicHandler|Error => {
         let v = tabkv_get_value(codes[i]);
         vmf = vmf.append(v);
     }
-    
 
-    //return arc_new_TopicHandler(TopicHandler.new(1000, vmf, db_mgr));
+    return arc_new_AsyncRequestHandler(AsyncRequestHandler.new(1000, vmf, db_mgr));
 }

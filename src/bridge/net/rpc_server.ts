@@ -1,14 +1,10 @@
-declare var _$structMgr;
 declare var pi_modules;
 import {Mgr} from "../rust/pi_db/mgr";
 import { Session} from "../rust/mqtt/session";
-import { Atom} from "../rust/pi_lib/atom";
 import {BonBuffer} from "../../pi/util/bon";
 import {OK, Error} from "../../pi/net/rpc/rpc_r.s";
-import {StructMgr} from "../../pi/struct/struct_mgr";
 import { writeBon} from "../../pi/struct/util";
 import { mqtt_respond} from "../rust/pi_serv/js_call";
-import { structMgr } from "../init_meta";
 
 const _$rpc = (topic: string, buffer: Uint8Array, mgr:any, mqttSession: any) => {
     mgr = new Mgr(mgr);

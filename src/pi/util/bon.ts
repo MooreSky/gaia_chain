@@ -61,97 +61,6 @@ export interface BonCode {
 }
 
 /**
- * @description 写容器
- * @example
- */
-export const writeContainer = (o: any, bb: BonBuffer, writeNext?: WriteNext) => {
-
-	if (Array.isArray(o)) {
-		writeArray(o, bb, writeNext);
-	//} else if (o instanceof Map) {
-		//writeMap(o, bb, writeNext);
-	} else {
-		writeNext(bb, o);
-	}
-}
-
-/**
- * @description 写数组
- * @example
- */
-export const writeArray = (o: Array<any>, bb: BonBuffer, writeNext: WriteNext) => {
-	for (let i = 0; i < o.length; i++) {
-		bb.write(o[i], writeNext);
-	}
-}
-
-/**
- * @description 写Map
- * @example
- */
-export const writeMap = (o: Map<number | string, any>, bb: BonBuffer, writeNext: WriteNext) => {
-	o.forEach((v, k) => {
-		bb.write(k, writeNext);
-		bb.write(v, writeNext);
-	});
-}
-/**
- * @description 读取二进制可序列化对象
- * @example
- */
-export const readContainer = (bb: BonBuffer, len: number, type: number, readNext: ReadNext) => {
-	switch (type) {
-		case 1:
-		//return readJson(bb, len);
-		case 2:
-			return readArray(bb);
-		case 3:
-			return //readMap(bb, readNext);
-		default:
-			return readNext(bb, type, len);
-	}
-}
-
-/**
- * @description 读取二进制可序列化对象
- * @example
- */
-export const readJson = (bb: BonBuffer) => {
-	let obj = {};
-	let count = bb.readPInt();
-	while (count-- > 0) {
-		obj['"' + bb.read() + '"'] = bb.read();
-	}
-	return obj;
-}
-
-/**
- * @description 读取二进制通用数组
- * @example
- */
-export const readArray = (bb: BonBuffer) => {
-	let arr = [];
-	let count = bb.readPInt();
-	while (count-- > 0) {
-		arr.push(bb.read());
-	}
-	return arr;
-}
-
-/**
- * @description 读取二进制通用map
- * @example
- */
-export const readMap = (bb: BonBuffer) => {
-	let map = new Map;
-	let count = bb.readPInt();
-	while (count-- > 0) {
-		map.set(bb.read(), bb.read());
-	}
-	return map;
-}
-
-/**
  * @description 二进制数据缓存
  * @example
  */
@@ -217,7 +126,7 @@ export class BonBuffer {
 	 * @description 写入任意类型
 	 * @example
 	 */
-	write(v: any, writeNext: WriteNext) {
+	write(v: any) {
 		if (v === undefined || v === null)
 			return this.writeNil();
 		let t = typeof v;
@@ -230,8 +139,19 @@ export class BonBuffer {
 		if (v instanceof ArrayBuffer)
 			return this.writeBin(new Uint8Array(v));
 		if (ArrayBuffer.isView(v) && (<any>v).BYTES_PER_ELEMENT > 0)
-			return this.writeBin(new Uint8Array(v.buffer, v.byteOffset, v.byteLength));
-		return this.writeCt(v, writeNext);
+            return this.writeBin(new Uint8Array(v.buffer, v.byteOffset, v.byteLength));
+        if (Object.prototype.toString.call(v)=='[object Array]')
+            return this.writeArray(v, (el) => {
+                this.write(el);
+            });
+        if(v instanceof Map)
+            return this.writeMap(v, (k, v) => {
+                this.write(k);
+                this.write(v);
+            });
+        if(v.bonEncode)
+            return this.writeBonCode(v);
+        throw "The serialization of this type is not supported";
 	}
 
 	/**
@@ -417,7 +337,7 @@ export class BonBuffer {
 	 * @example
 	 */
 	writeUtf8(s: string) {
-		let arr = utf8Encode(s);
+        let arr = utf8Encode(s);
 		return this.writeData(arr, 110);
     }
     
@@ -590,8 +510,9 @@ export class BonBuffer {
 			this.tail += 9;
 			limitSize = 0xffffffffffffffff;
 		}
-		let tt = this.tail;
-		writeContainer(o, this, writeNext);
+        let tt = this.tail;
+        writeNext(this, o);
+		//writeContainer(o, this, writeNext);
 		let len = this.tail - tt;
 		// 判断实际写入的大小超出预期的大小，需要移动数据
 		if (limitSize < len) {
@@ -658,9 +579,26 @@ export class BonBuffer {
 	 * @description 读u8
 	 * @example
 	 */
-	readU8() {
+	readU8(): number {
 		return this.view.getUint8(this.head++);
     }
+
+    /**
+	 * @description 读U16
+	 * @example
+	 */
+	readU16(): number {
+        this.head += 2;
+		return this.view.getUint16(this.head-2);
+	}
+	/**
+	 * @description 读U32
+	 * @example
+	 */
+	readU32(): number {
+		this.head += 4;
+		return this.view.getUint32(this.head-4);
+	}
     
     /**
 	 * @description 读整数
@@ -776,7 +714,7 @@ export class BonBuffer {
 		if (this.head >= this.tail)
 			throw new Error("read overflow: " + this.head);
 		let t = this.view.getUint8(this.head++);
-		readContent(this, t)
+		return readContent(this, t, readNext);
     }
 	/**
 	 * @description 读出一个正整数，不允许大于0x20000000，使用动态长度
@@ -845,6 +783,14 @@ export class BonBuffer {
             return null;
         }
         (<BonCode>new constructor()).bonDecode(this)
+    }
+
+    readCt(next: ReadNext): any{
+        let t = this.view.getUint8(this.head++);
+        if (t < 180 || t > 249) {
+			throw "非容器， 无法读";
+		}
+		return readContent(this, t, next);
     }
 }
 
@@ -946,23 +892,23 @@ const readContent = (bb: BonBuffer, t: number, readNext?: ReadNext) => {
         case 245:
             len = bb.view.getUint8(bb.head);
             bb.head += 6;
-            return readContainer(bb, len, bb.view.getUint32(bb.head - 4, true), readNext);
+            return readNext(bb, bb.view.getUint32(bb.head - 4, true), len);
         case 246:
             len = bb.view.getUint16(bb.head, true);
             bb.head += 7;
-            return readContainer(bb, len, bb.view.getUint32(bb.head - 4, true), readNext);
+            return readNext(bb, bb.view.getUint32(bb.head - 4, true), len);
         case 247:
             len = bb.view.getUint32(bb.head, true);
             bb.head += 9;
-            return readContainer(bb, len, bb.view.getUint32(bb.head - 4, true), readNext);
+            return readNext(bb, bb.view.getUint32(bb.head - 4, true), len);
         case 248:
             len = bb.view.getUint16(bb.head, true) + (bb.view.getUint32(bb.head + 2, true) * 0x10000);
             bb.head += 11;
-            return readContainer(bb, len, bb.view.getUint32(bb.head - 4, true), readNext);
+            return readNext(bb, bb.view.getUint32(bb.head - 4, true), len);
         case 249:
             len = bb.view.getUint32(bb.head, true) + (bb.view.getUint32(bb.head + 4, true) * 0x100000000);
             bb.head += 13;
-            return readContainer(bb, len, bb.view.getUint32(bb.head - 4, true), readNext);
+            return readNext(bb, bb.view.getUint32(bb.head - 4, true), len);
         default:
             if (t < 30)
                 return t - 10;
@@ -981,7 +927,7 @@ const readContent = (bb: BonBuffer, t: number, readNext?: ReadNext) => {
             if (t < 245){
                 bb.head += 4;
                 // 读取容器类型
-                return readContainer(bb, t - 180, bb.view.getUint32(bb.head - 4, true), readNext);
+                return readNext(bb, bb.view.getUint32(bb.head - 4, true), t - 180 );
             }	
             throw new Error("invalid type :" + t);
     }
