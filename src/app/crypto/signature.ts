@@ -5,9 +5,10 @@
 
 // ============================== import
 
-import { create_rand, fill_bytes } from "../../bridge/rust/pi_serv/js_call"
+import { H256, H512 } from "../util/hash"
+
 import * as ed25519 from "../../bridge/rust/pi_crypto/ed25519"
-import { H256, H512 } from "../../bridge/rust/pi_math/hash"
+import { create_rand, fill_bytes } from "../../bridge/rust/pi_serv/js_call"
 
 // ============================== export
 
@@ -15,7 +16,7 @@ import { H256, H512 } from "../../bridge/rust/pi_math/hash"
  * generate secret-public key with random seed
  * @returns [H512, H256] [secret, public]
  */
-const keypair = () => {
+export const keypair = () => {
 
     const SEED_BYTES = 32;
 
@@ -30,14 +31,14 @@ const keypair = () => {
  * generate secret-public key with seed
  * @returns [H512, H256] [secret, public]
  */
-const keypairWithSeed = (seed: H256) => {
+export const keypairWithSeed = (seed: H256) => {
     return ed25519.keypair(seed.take());
 }
 
-const signature = (msgHash: H256, secretKey: H512) => {
+export const signature = (msgHash: H256, secretKey: H512) => {
     return ed25519.sign(msgHash.take(), secretKey.take());
 }
 
-const verify = (msgHash: H256, publicKey: H256, signature: H512) => {
+export const verify = (msgHash: H256, publicKey: H256, signature: H512) => {
     return ed25519.verify(msgHash.take(), publicKey.take(), signature.take());
 }
