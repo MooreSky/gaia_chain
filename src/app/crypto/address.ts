@@ -1,9 +1,21 @@
-import { keccak256 } from "../../bridge/rust/pi_crypto/hash"
-import { H160, H256 } from "../../bridge/rust/pi_math/hash"
+
+/**
+ * address
+ */
+
+// ============================== import
+
+import { H160, H256, hash } from "./hash"
+
+// ============================== export
 
 export const generateAddress = (publicKey: H256) => {
-    let hash = keccak256(publicKey.take());
-    let buf = hash.take();
-    let arr = new Uint8Array(buf.buffer, buf.length - 20, 20);
-    return new H160(buf);
+    // H160 is 20Bytes
+    const ADDRESS_BYTES = 20;
+
+    let hashArray = hash(publicKey.take()).take();
+    let arr = new Uint8Array(hashArray.buffer, hashArray.length - ADDRESS_BYTES, ADDRESS_BYTES);
+    
+    // TODO: Convert Uint8Array to H160
+    return new H160(hashArray);
 }
