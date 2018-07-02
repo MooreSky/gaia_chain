@@ -1,11 +1,13 @@
 
 import {NativeObject, call, Error, syncCall} from "../../vm/vm";
 import {NObject} from "../../vm/nobject";
+import {StructInfo} from "../../../pi/struct/sinfo";
 import {GuidGen} from "../pi_lib/guid"
 import {Vec} from "../def/vec"
 import {Atom} from "../pi_lib/atom"
 import {StructInfo} from "../pi_lib/sinfo"
-export class Mgr extends NObject{    
+export class Mgr extends NObject{
+    static _$info = new StructInfo("Mgr", 733545086 , new Map(), []);    
     
     
     static new = (gen:GuidGen): Mgr => {          
@@ -25,7 +27,8 @@ export class Mgr extends NObject{
         return result; 
     }
 }
-export class Tr extends NObject{    
+export class Tr extends NObject{
+    static _$info = new StructInfo("Tr", 761534130 , new Map(), []);    
     
     prepare = ():void| Error => {     
     

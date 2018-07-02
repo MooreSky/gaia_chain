@@ -15,7 +15,8 @@ import {BonBuffer} from "../pi/util/bon"
 import { Atom } from "./rust/pi_lib/atom";
 import { Error, __thread_call } from "./vm/vm";
 import * as Mqtt from "./init/mqtt.i";
-import {} from "../tests/test.i";
+//import {} from "../app/async";
+//import {} from "../app/gen";
 let db_mgr = new Mgr((<any>self)._$db_mgr);
 //let memery_db = MemeryDB.new(); 
 //export const db_mgr = Mgr.new(GuidGen.new(0,0));
@@ -26,8 +27,8 @@ for(var id in pi_modules){
 			var c = pi_modules[id].exports[kk];
 			if(Struct.isPrototypeOf(c) && c._$info){
                 // console.log(c._$info.name_hash);
-				//sMgr.register(c._$info.name_hash, c, id + "." + kk);
                 // console.log(id + "." + kk);
+				//sMgr.register(c._$info.name_hash, c, id + "." + kk);
 			}
 		}
 	}
@@ -84,4 +85,3 @@ const init = () => {
     //test_set_timeout();
 }
 //__thread_call(init);
-console.log("start success");

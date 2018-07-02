@@ -1,12 +1,17 @@
 
 import {NativeObject, Error, syncCall, call} from "../../vm/vm";
 import {NObject} from "../../vm/nobject";
+import {StructInfo} from "../../../pi/struct/sinfo";
+import {NativeObjsAuth} from "./bonmgr"
 import {Vec} from "../def/vec"
-export class VMFactory extends NObject{    
+export class VMFactory extends NObject{
+    static _$info = new StructInfo("VMFactory", 1373771230 , new Map(), []);    
     
     
-    static new = (size:number): VMFactory => {          
-        let result = call(2222376158,[ size ]);     
+    static new = (size:number,auth:NativeObjsAuth): VMFactory => {               
+        (<any>auth) = auth.self;
+        
+        let result = call(2222376158,[ size,auth ]);     
         (<any>result) = new VMFactory(result);
         
         return result; 

@@ -2,6 +2,7 @@
 import {NativeObject, call, syncCall, callbacks, u128ToBuffer, u64ToBuffer} from "../../vm/vm";
 import {NObject} from "../../vm/nobject";
 import * as bigInt from "../../vm/biginteger";
+import {StructInfo} from "../../../pi/struct/sinfo";
 import {Vec} from "../def/vec"
 import {Tr} from "../pi_db/mgr"
 import {Mgr} from "../pi_db/mgr"
@@ -16,7 +17,8 @@ import {RPCServer} from "../rpc/server"
 import {TopicHandler} from "./handler"
 import {AsyncRequestHandler} from "./handler"
 import {Depend} from "./depend"
-export class DBIter extends NObject{    
+export class DBIter extends NObject{
+    static _$info = new StructInfo("DBIter", 517878327 , new Map(), []);    
     
     next = ():[Vec,Vec]| Error => {     
     
@@ -245,8 +247,11 @@ export const try_fill_bytes = (or:Rand,len:number): Vec| Error => {
     return result; 
 }
 export class DBWare extends NObject{
+    static _$info = new StructInfo("DBWare", 425649979 , new Map(), []);
 }
 export class AtomIndex extends NObject{
+    static _$info = new StructInfo("AtomIndex", 2761912410 , new Map(), []);
 }
 export class Rand extends NObject{
+    static _$info = new StructInfo("Rand", 2239088127 , new Map(), []);
 }

@@ -2,8 +2,10 @@
 import {NativeObject, call} from "../../vm/vm";
 import {NObject} from "../../vm/nobject";
 import * as bigInt from "../../vm/biginteger";
+import {StructInfo} from "../../../pi/struct/sinfo";
 import {TabKV} from "../pi_db/db"
-export class Vec extends NObject{    
+export class Vec extends NObject{
+    static _$info = new StructInfo("Vec", 4144079164 , new Map(), []);    
     
     
     static new_u8 = (): Vec => {     

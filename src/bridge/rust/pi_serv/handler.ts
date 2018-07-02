@@ -2,9 +2,11 @@
 import {NativeObject, call, syncCall, callbacks, u128ToBuffer, u64ToBuffer} from "../../vm/vm";
 import {NObject} from "../../vm/nobject";
 import * as bigInt from "../../vm/biginteger";
+import {StructInfo} from "../../../pi/struct/sinfo";
 import {VMFactory} from "../pi_vm/pi_vm_impl"
 import {Mgr} from "../pi_db/mgr"
-export class TopicHandler extends NObject{    
+export class TopicHandler extends NObject{
+    static _$info = new StructInfo("TopicHandler", 585492653 , new Map(), []);    
     
     
     static new = (len:number,factory:VMFactory,mgr:Mgr): TopicHandler => {               
@@ -18,7 +20,8 @@ export class TopicHandler extends NObject{
         return result; 
     }
 }
-export class AsyncRequestHandler extends NObject{    
+export class AsyncRequestHandler extends NObject{
+    static _$info = new StructInfo("AsyncRequestHandler", 3366364668 , new Map(), []);    
     
     
     static new = (len:number,factory:VMFactory,mgr:Mgr): AsyncRequestHandler => {               

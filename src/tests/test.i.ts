@@ -1,4 +1,4 @@
-import { chai } from "./framework/chai";
+
 import { mocha } from "./framework/mocha";
 
 import address from "./app/crypto/address"
@@ -10,7 +10,7 @@ let testArray = [address];
 mocha.setup('bdd');
 
 for (let test of testArray) {
-    test(describe, it, chai);
+    test(describe, it);
 }
 
 mocha.run();

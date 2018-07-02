@@ -1,7 +1,9 @@
 
 import {NativeObject, call, u128ToBuffer, u64ToBuffer} from "../../vm/vm";
 import {NObject} from "../../vm/nobject";
-export class GuidGen extends NObject{    
+import {StructInfo} from "../../../pi/struct/sinfo";
+export class GuidGen extends NObject{
+    static _$info = new StructInfo("GuidGen", 1736136244 , new Map(), []);    
     
     
     static new = (node_time:bigInt.BigInteger,node_id:number): GuidGen => {          

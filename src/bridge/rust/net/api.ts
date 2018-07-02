@@ -1,7 +1,9 @@
 
 import {NativeObject, call} from "../../vm/vm";
 import {NObject} from "../../vm/nobject";
-export class NetManager extends NObject{    
+import {StructInfo} from "../../../pi/struct/sinfo";
+export class NetManager extends NObject{
+    static _$info = new StructInfo("NetManager", 3179886960 , new Map(), []);    
     
     
     static new = (): NetManager => {     
