@@ -44,7 +44,7 @@ export const write = (o: any, bb: BonBuffer) => {
 }
 
 export const read = (bb: BonBuffer, mgr: StructMgr): any => {
-    bb.read((b, t): any => {
+    return bb.read((b, t): any => {
         if(t === 2){
             return b.readArray(() => {
                 return read(b, mgr);
@@ -60,5 +60,3 @@ export const read = (bb: BonBuffer, mgr: StructMgr): any => {
         }
     });
 }
-
-console.log("aaa");

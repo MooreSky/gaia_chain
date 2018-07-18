@@ -1,11 +1,12 @@
 
-import {NativeObject, call, u128ToBuffer, u64ToBuffer} from "../../vm/vm";
+import {NativeObject, call} from "../../vm/vm";
 import {NObject} from "../../vm/nobject";
-import * as bigInt from "../../vm/biginteger";
+import * as bigInt from "../../../pi/bigint/biginteger";
+import {StructInfo as SInfo} from "../../../pi/struct/sinfo";
+import {u128ToBuffer, u64ToBuffer} from "../../../pi/bigint/util";
 import {H160} from "../pi_math/hash"
 import {H256} from "../pi_math/hash"
 import {H32} from "../pi_math/hash"
-
 
 export const ripemd160 = (input:Uint8Array): H160 => {          
     let result = call(1476345609,[ input ]);     
@@ -14,14 +15,12 @@ export const ripemd160 = (input:Uint8Array): H160 => {
     return result; 
 }
 
-
 export const keccak256 = (input:Uint8Array): H256 => {          
     let result = call(2108893530,[ input ]);     
     (<any>result) = new H256(result);
     
     return result; 
 }
-
 
 export const dhash160 = (input:Uint8Array): H160 => {          
     let result = call(842379557,[ input ]);     
@@ -30,14 +29,12 @@ export const dhash160 = (input:Uint8Array): H160 => {
     return result; 
 }
 
-
 export const dhash256 = (input:Uint8Array): H256 => {          
     let result = call(1125159944,[ input ]);     
     (<any>result) = new H256(result);
     
     return result; 
 }
-
 
 export const siphash24 = (key0:bigInt.BigInteger,key1:bigInt.BigInteger,input:Uint8Array): bigInt.BigInteger => {          
     (<any>key0) = u64ToBuffer(key0);
@@ -49,7 +46,6 @@ export const siphash24 = (key0:bigInt.BigInteger,key1:bigInt.BigInteger,input:Ui
     
     return result; 
 }
-
 
 export const checksum = (data:Uint8Array): H32 => {          
     let result = call(235181891,[ data ]);     

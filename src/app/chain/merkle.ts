@@ -11,8 +11,7 @@ import { keccak256 } from "../crypto/hash"
 // ============================== export
 
 /**
- * @description calculate the root of the merkle tree
- *     https://en.bitcoin.it/wiki/Protocol_documentation#Merkle_Trees
+ * @description compute root of merkle tree
  */
 export const merkleRoot = (hashes: H256[]) => {
 	

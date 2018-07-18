@@ -24,7 +24,7 @@ export enum EnumType{
 	UTC,
 	Arr,
 	Map,
-	Struct,
+	Struct,//元组被认为是结构体类型
 }
 
 export class FieldType implements BonCode{
@@ -130,6 +130,9 @@ export class StructInfo implements BonCode {
         bb.writeMap(this.notes, (k, v) => {
             bb.writeUtf8(k);
             bb.writeUtf8(v);
+        });
+        bb.writeArray(this.fields, (el) => {
+            bb.writeBonCode(el);
         });
     }
 	/**

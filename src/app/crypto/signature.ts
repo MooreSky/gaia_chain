@@ -21,7 +21,6 @@ export const keypair = () => {
     const SEED_BYTES = 32;
 
     let rand = create_rand();
-    // FIXME: fill_bytes crash
     let seed = fill_bytes(rand, SEED_BYTES);
 
     return ed25519.keypair(seed.as_slice_u8());

@@ -7,7 +7,6 @@ _$define("rt/js_njs/njs", function (require, exports, module){
         this.message = str;
     }
     exports.syncCall = function(funHash, args){
-        console.log("7777777777777777777777777788888888888888888888888888888888888");
         try {
             var r = NativeObject.call(funHash, args);
            

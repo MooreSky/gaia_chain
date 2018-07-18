@@ -33,4 +33,3 @@ const _$rpc = (topic: string, buffer: Uint8Array, mgr:any, mqttSession: any) => 
     }
 }
 (<any>self)._$rpc = _$rpc;
-console.log((<any>self)._$rpc);

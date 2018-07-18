@@ -3,7 +3,7 @@ import {Vec} from "../rust/def/vec";
 import {NetManager} from "../rust/net/api";
 import {Mgr, Tr} from "../rust/pi_db/mgr";
 import {RPCServer} from "../rust/rpc/server";
-import {register_async_handler, iter_db, DBIter, get_depend, tabkv_new, arc_deref_Vec, tabkv_get_value, arc_new_AsyncRequestHandler} from "../rust/pi_serv/js_call";
+import {registerAsyncHandler, iterDb, DBIter, getDepend, tabkvNew, arcDerefVec, tabkvGetValue, arcNewAsyncRequestHandler, cloneDbMgr} from "../rust/pi_serv/js_call";
 import {Depend} from "../rust/pi_serv/depend";
 import {AsyncRequestHandler} from "../rust/pi_serv/handler";
 import {cfgMgr} from "../../pi/util/cfg";
@@ -12,15 +12,14 @@ import {Error} from "../vm/vm";
 import {VMFactory} from "../rust/pi_vm/pi_vm_impl";
 import {utf8Decode} from "../../pi/lang/butil";
 import {BonBuffer} from "../../pi/util/bon";
-
-let db_mgr = new Mgr((<any>self)._$db_mgr);
-let depend = new Depend((<any>self)._$depend);
+import {NativeObjsAuth} from "../rust/pi_vm/bonmgr";
+import {db_mgr, depend} from "./init_cfg";
 
 //初始化async服务
 export const init = () => {
     let map = new Map();
     read(db_mgr, (tr) => {
-        let iter = iter_db(tr, "memory", AsyncMeta._$info.name, null, false, null);
+        let iter = iterDb(tr, "memory", AsyncMeta._$info.name, null, false, null);
         let flag = true;
         if(iter instanceof Error){
             return iter;
@@ -34,8 +33,8 @@ export const init = () => {
                 flag = false;
                 continue;
             }
-            let v8 = arc_deref_Vec(el[1]);
-            let buf = v8.as_slice_u8();
+            let v8 = arcDerefVec(el[1]);
+            let buf = v8.asSliceU8();
             let bb = new BonBuffer(buf);
             
             let rpc_meta = new AsyncMeta();
@@ -43,7 +42,6 @@ export const init = () => {
             let topic = rpc_meta.path;
             let file = topic.slice(0, topic.lastIndexOf("."));
             let handler = map.get(file);
-            console.log("topic:" + topic);
             if(!handler){
                 handler = createHandler(tr, file);//创建handler， 同一js文件下的rpc函数， handler应该是同一个
                 if(handler instanceof Error){
@@ -51,32 +49,32 @@ export const init = () => {
                 }
                 map.set(file, handler);
             }
-            register_async_handler(topic, handler); //注册一个异步处理器
+            registerAsyncHandler(topic, handler); //注册一个异步处理器
         }
     })
-    console.log("init mqtt ok");
+    console.log("init async ok");
 }
 
 const createHandler = (tr: Tr, file: string): AsyncRequestHandler|Error => {
-    let vmf = VMFactory.new(0);
-    let dp = get_depend(depend, file + ".r.js").as_slice_String();
-    let codeItems = Vec.new_TabKV();
+    let vmf = VMFactory.new(0, NativeObjsAuth.withNone());
+    let dp = getDepend(depend, file + ".r.js").asSliceString();
+    let codeItems = Vec.newTabKV();
     for(let i = 0; i < dp.length; i++){
         let bb = new BonBuffer();
         bb.writeUtf8(dp[i]);
-        let item = tabkv_new("memory", "_$code", bb.getBuffer());
-        codeItems.push_TabKV(item);
+        let item = tabkvNew("memory", "_$code", bb.getBuffer());
+        codeItems.pushTabKV(item);
     }
     let codeResult = tr.query(codeItems, 1000, false);
     if(codeResult instanceof Error){
         return codeResult;
     }
-    let codes = codeResult.as_slice_TabKV();
+    let codes = codeResult.asSliceTabKV();
     
     for(let i = 0; i < codes.length; i++){
-        let v = tabkv_get_value(codes[i]);
+        let v = tabkvGetValue(codes[i]);
         vmf = vmf.append(v);
     }
 
-    return arc_new_AsyncRequestHandler(AsyncRequestHandler.new(1000, vmf, db_mgr));
+    return arcNewAsyncRequestHandler(AsyncRequestHandler.new(1000, vmf, cloneDbMgr(db_mgr)));
 }
