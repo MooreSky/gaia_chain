@@ -8,7 +8,7 @@
 import { H256, H512 } from "../util/hash"
 
 import * as ed25519 from "../../bridge/rust/pi_crypto/ed25519"
-import { create_rand, fill_bytes } from "../../bridge/rust/pi_serv/js_call"
+import { createRand, fillBytes } from "../../bridge/rust/pi_serv/js_call"
 
 // ============================== export
 
@@ -20,10 +20,10 @@ export const keypair = () => {
 
     const SEED_BYTES = 32;
 
-    let rand = create_rand();
-    let seed = fill_bytes(rand, SEED_BYTES);
+    let rand = createRand();
+    let seed = fillBytes(rand, SEED_BYTES);
 
-    return ed25519.keypair(seed.as_slice_u8());
+    return ed25519.keypair(seed.asSliceU8());
 }
 
 /**

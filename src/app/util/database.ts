@@ -57,7 +57,7 @@ export const createDatabase = (type: DatabaseType, name: string) => {
 
     let r = false;
     if (db) {
-        r = jsCall.register_memery_db(s_database_mgr, name, db);
+        r = jsCall.registerMemeryDb(s_database_mgr, name, db);
     }
     return r;
 }
@@ -67,8 +67,8 @@ export const createDatabase = (type: DatabaseType, name: string) => {
  */
 export const createTable = (tr: Tr, dbName: string, tableNames: string[]) => {
     for (let name of tableNames) {
-        let info = jsCall.create_sinfo(new BonBuffer().getBuffer());
-        let r = tr.alter(Atom.from_From(dbName), Atom.from_From(name), info);
+        let info = jsCall.createSinfo(new BonBuffer().getBuffer());
+        let r = tr.alter(Atom.fromFrom(dbName), Atom.fromFrom(name), info);
         // TODO: when table is already exist, r is Error
     }
     return true;
@@ -78,7 +78,7 @@ export const createTable = (tr: Tr, dbName: string, tableNames: string[]) => {
  * delete data table
  */
 export const deleteTable = (tr: Tr, dbName: string, tableName: string) => {
-    return tr.alter(Atom.from_From(dbName), Atom.from_From(tableName), null);
+    return tr.alter(Atom.fromFrom(dbName), Atom.fromFrom(tableName), null);
 }
 
 /**
@@ -87,13 +87,13 @@ export const deleteTable = (tr: Tr, dbName: string, tableName: string) => {
  */
 export const queryItems = (tr: Tr, dbName: string, tableName: string, keys: any[]) => {
 
-    let items = Vec.new_TabKV();
+    let items = Vec.newTabKV();
 
     for (let key of keys) {
         let bb = new BonBuffer();
         serde(key, bb);
-        let item = jsCall.tabkv_new(dbName, tableName, bb.getBuffer());
-        items.push_TabKV(item);
+        let item = jsCall.tabkvNew(dbName, tableName, bb.getBuffer());
+        items.pushTabKV(item);
     }
 
     let r = tr.query(items, 0, false);
@@ -102,7 +102,7 @@ export const queryItems = (tr: Tr, dbName: string, tableName: string, keys: any[
     }
 
     let result = [];
-    let kvs = (<Vec>r).as_slice_TabKV();
+    let kvs = (<Vec>r).asSliceTabKV();
     for (let i = 0; i < kvs.length; i++) {
         let u8Arr = getKVValue(kvs[i]);
         result.push(deserde(new BonBuffer(u8Arr), structMgr));
@@ -114,7 +114,7 @@ export const queryItems = (tr: Tr, dbName: string, tableName: string, keys: any[
  * @return {boolean} indicate that writing data is ok
  */
 export const setItems = (tr: Tr, dbName: string, tableName: string, kvs: [any, any][]) => {
-    let items = Vec.new_TabKV();
+    let items = Vec.newTabKV();
     for (let [k, v] of kvs) {
         let kBuffer = new BonBuffer();
         serde(k, kBuffer);
@@ -124,8 +124,8 @@ export const setItems = (tr: Tr, dbName: string, tableName: string, kvs: [any, a
         serde(v, vBuffer);
         let vArr = vBuffer.getBuffer();
 
-        let item = jsCall.tabkv_with_value(dbName, tableName, kArr, vArr);
-        items.push_TabKV(item);
+        let item = jsCall.tabkvWithValue(dbName, tableName, kArr, vArr);
+        items.pushTabKV(item);
     }
 
     let r = tr.modify(items, 0, false);
@@ -137,12 +137,12 @@ export const setItems = (tr: Tr, dbName: string, tableName: string, kvs: [any, a
  * @return {boolean} indicate that writing data is ok
  */
 export const removeItems = (tr: Tr, dbName: string, tableName: string, keys: any[]) => {
-    let items = Vec.new_TabKV();
+    let items = Vec.newTabKV();
     for (let key of keys) {
         let bb = new BonBuffer();
         serde(key, bb);
-        let item = jsCall.tabkv_new(dbName, tableName, bb.getBuffer());
-        items.push_TabKV(item);
+        let item = jsCall.tabkvNew(dbName, tableName, bb.getBuffer());
+        items.pushTabKV(item);
     }
 
     let r = tr.modify(items, 0, false);
@@ -153,7 +153,7 @@ export const removeItems = (tr: Tr, dbName: string, tableName: string, keys: any
  * iterate the tableName 
  */
 export const iterItems = (tr: Tr, dbName: string, tableName: string, cb: IterCB) => {
-    let iter = jsCall.iter_db(tr, dbName, tableName, null, false, null);
+    let iter = jsCall.iterDb(tr, dbName, tableName, null, false, null);
     if (iter instanceof Error) {
         return;
     }
@@ -177,9 +177,9 @@ let s_database_mgr = new Mgr(db_mgr);
 type IterCB = (key: Uint8Array, value: Uint8Array) => void;
 
 const getKVValue = (kv: TabKV) => {
-    let vec = jsCall.tabkv_get_value(kv);
-    let vecImpl = jsCall.arc_deref_Vec(vec);
-    let r = vecImpl.as_slice_u8();
+    let vec = jsCall.tabkvGetValue(kv);
+    let vecImpl = jsCall.arcDerefVec(vec);
+    let r = vecImpl.asSliceU8();
     return r;
 }
 
@@ -189,7 +189,7 @@ const iterKV = (iter: jsCall.DBIter): Error | [Uint8Array, Uint8Array] => {
         return elem;
     }
 
-    let key = jsCall.arc_deref_Vec(elem[0]);
-    let value = jsCall.arc_deref_Vec(elem[1]);
-    return [key.as_slice_u8(), value.as_slice_u8()];
+    let key = jsCall.arcDerefVec(elem[0]);
+    let value = jsCall.arcDerefVec(elem[1]);
+    return [key.asSliceU8(), value.asSliceU8()];
 }

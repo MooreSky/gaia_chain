@@ -17,5 +17,5 @@ export const generateAddress = (publicKey: H256) => {
     let buf = keccak256(publicKey.take()).take();
     let arr = new Uint8Array(buf.buffer, buf.length - ADDRESS_BYTES, ADDRESS_BYTES);
     
-    return H160.from_buf(buf);
+    return H160.fromBuf(buf);
 }
